@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>REZ</title>
+  <link rel="icon" href="images/favicon.png" type="image/x-icon" />
+  <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon" />
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --bg-top: #ffd6ea;
+      --bg-bottom: #f8e7ff;
+      --card-bg: #ffffff;
+      --accent-pink: #ff4fa3;
+      --accent-purple: #a245ff;
+      --accent-purple-deep: #862bff;
+      --text-pink: #ff1493;
+      --text-purple: #7133c9;
+      --shadow-soft: 0 10px 30px rgba(255, 105, 180, 0.35);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: "Poppins", sans-serif;
+      background: radial-gradient(circle at top left, #ffe6ff 0, var(--bg-top) 35%, var(--bg-bottom) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Floating confetti / dots */
+    .dot {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: float 12s infinite alternate ease-in-out;
+    }
+    .dot.small { width: 8px; height: 8px; }
+    .dot.medium { width: 12px; height: 12px; }
+    .dot.big { width: 16px; height: 16px; }
+
+    .dot.pink   { background: #ff6bb1; }
+    .dot.purple { background: #c39bff; }
+    .dot.yellow { background: #ffd76b; }
+    .dot.red    { background: #ff5f5f; }
+    .dot.blue   { background: #5fb9ff; }
+    .dot.green  { background: #54d989; }
+
+    @keyframes float {
+      from { transform: translateY(20px); }
+      to   { transform: translateY(-40px); }
+    }
+
+    .card {
+      width: min(900px, 95vw);
+      background: var(--card-bg);
+      border-radius: 32px;
+      padding: 40px 30px 30px;
+      box-shadow: var(--shadow-soft);
+      text-align: center;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* LOADING STATE */
+    #loading {
+      font-size: 0.95rem;
+      color: var(--text-purple);
+      margin-bottom: 12px;
+    }
+
+    /* COUNTDOWN CARD (before unlock) */
+    #card-countdown h1 {
+      font-family: "Dancing Script", cursive;
+      font-size: clamp(2rem, 3vw + 1rem, 2.7rem);
+      color: var(--text-pink);
+      margin-bottom: 30px;
+    }
+
+    #card-countdown h1 span {
+      margin-left: 6px;
+    }
+
+    .countdown-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 30px;
+    }
+
+    .time-box {
+      background: #fff7ff;
+      border-radius: 22px;
+      padding: 18px 10px;
+      box-shadow: 0 7px 18px rgba(211, 120, 255, 0.25);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .time-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-purple);
+      margin-bottom: 6px;
+    }
+
+    .time-label {
+      font-size: 0.9rem;
+      color: #ff4fa3;
+      margin-bottom: 4px;
+    }
+
+    .time-icon {
+      font-size: 1.1rem;
+    }
+
+    .message-box {
+      background: #ffe4f2;
+      margin: 0 auto;
+      margin-top: 8px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      width: min(520px, 100%);
+      font-size: 0.95rem;
+      color: #a0347e;
+    }
+
+.dots {
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* Base dot style */
+.dots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffabc9;
+  opacity: 0.4;
+  transform: scale(0.7);
+  animation: dotPulse 1.2s infinite ease-in-out;
+}
+
+/* Staggered delays so they “travel” like a loading indicator */
+.dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Pulse / loading keyframes */
+@keyframes dotPulse {
+  0%, 80%, 100% {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+    background: #ff4fa3; /* brighter in the middle of the pulse */
+  }
+}
+
+
+    .hint {
+      margin-top: 18px;
+      font-size: 0.8rem;
+      color: #b45aa3;
+    }
+
+    /* BIRTHDAY CARD (after countdown finishes) */
+    #card-finished {
+      display: none; /* hidden until timer is done */
+    }
+
+    #card-finished h1 {
+      font-family: "Dancing Script", cursive;
+      font-size: clamp(2.2rem, 3.2vw + 1rem, 2.9rem);
+      color: var(--text-pink);
+      margin-bottom: 8px;
+    }
+
+    #card-finished .sub-icons {
+      font-size: 1.1rem;
+      color: #ff7bc5;
+      margin-bottom: 4px;
+    }
+
+    #card-finished .to-line {
+      font-size: 1.2rem;
+      color: var(--text-pink);
+      margin-bottom: 24px;
+      font-weight: 600;
+    }
+
+    .unlock-card {
+      margin: 0 auto 26px;
+      width: min(420px, 100%);
+      height: 150px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, #ff74b3, #ff5fd8, #a95fff, #6f5fff);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      box-shadow: 0 12px 30px rgba(172, 88, 255, 0.4);
+      cursor: pointer;
+      position: relative;
+      transform: rotate(-2deg);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .unlock-card:hover {
+      transform: rotate(0deg) translateY(-4px);
+      box-shadow: 0 16px 40px rgba(172, 88, 255, 0.6);
+    }
+
+    .unlock-title {
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+
+    .unlock-icon {
+      font-size: 2.2rem;
+    }
+
+    .unlock-sparkle {
+      position: absolute;
+      top: 12px;
+      right: 20px;
+      font-size: 1.2rem;
+    }
+
+    .final-message {
+      width: min(640px, 100%);
+      margin: 0 auto;
+      font-size: 0.98rem;
+      color: var(--text-purple);
+      line-height: 1.5;
+    }
+
+    .final-message span {
+      color: var(--accent-pink);
+      font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 26px 18px 22px;
+      }
+
+      .countdown-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .unlock-card {
+        height: 130px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Floating dots / confetti – put this at the top of <body>, before the cards -->
+<div class="dot small pink"   style="top: 5%;   left: 10%;  animation-duration: 11s;"></div>
+<div class="dot medium purple"style="top: 12%;  left: 30%;  animation-duration: 13s;"></div>
+<div class="dot small yellow" style="top: 8%;   left: 70%;  animation-duration: 15s;"></div>
+<div class="dot big pink"     style="top: 18%;  left: 85%;  animation-duration: 12s;"></div>
+
+<div class="dot small blue"   style="top: 30%;  left: 7%;   animation-duration: 10s;"></div>
+<div class="dot medium green" style="top: 32%;  left: 40%;  animation-duration: 16s;"></div>
+<div class="dot small red"    style="top: 28%;  left: 80%;  animation-duration: 18s;"></div>
+<div class="dot medium purple"style="top: 35%;  left: 60%;  animation-duration: 14s;"></div>
+
+<div class="dot big yellow"   style="top: 55%;  left: 15%;  animation-duration: 17s;"></div>
+<div class="dot small pink"   style="top: 52%;  left: 35%;  animation-duration: 12s;"></div>
+<div class="dot medium blue"  style="top: 58%;  left: 55%;  animation-duration: 19s;"></div>
+<div class="dot small green"  style="top: 50%;  left: 75%;  animation-duration: 13s;"></div>
+
+<div class="dot medium red"   style="top: 72%;  left: 20%;  animation-duration: 15s;"></div>
+<div class="dot small purple" style="top: 78%;  left: 45%;  animation-duration: 11s;"></div>
+<div class="dot big pink"     style="top: 70%;  left: 68%;  animation-duration: 16s;"></div>
+<div class="dot small yellow" style="top: 82%;  left: 88%;  animation-duration: 18s;"></div>
+
+
+  <!-- COUNTDOWN CARD -->
+  <div id="card-countdown" class="card">
+    <div id="loading">Loading timer…</div>
+
+    <h1>Your Special Day is Almost Here<span>💕</span></h1>
+
+    <div class="countdown-grid">
+      <div class="time-box">
+        <div id="days" class="time-value">0</div>
+        <div class="time-label">Days</div>
+        <div class="time-icon">❤️</div>
+      </div>
+      <div class="time-box">
+        <div id="hours" class="time-value">0</div>
+        <div class="time-label">Hours</div>
+        <div class="time-icon">🎁</div>
+      </div>
+      <div class="time-box">
+        <div id="minutes" class="time-value">0</div>
+        <div class="time-label">Minutes</div>
+        <div class="time-icon">🎂</div>
+      </div>
+      <div class="time-box">
+        <div id="seconds" class="time-value">0</div>
+        <div class="time-label">Seconds</div>
+        <div class="time-icon">⭐</div>
+      </div>
+    </div>
+
+    <div class="message-box">
+      Just a little more... A small gift for my favorite person ❤️
+      <div class="dots">
+        <span class="active"></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="hint">
+      When the countdown reaches 0, you'll be able to open your birthday card ✨
+    </div>
+  </div>
+
+  <!-- BIRTHDAY CARD (shown when timer finishes) -->
+  <div id="card-finished" class="card">
+    <h1>Happy Birthday!</h1>
+    <div class="sub-icons">🎂 ✨ ❤️</div>
+    <div class="to-line">To My Cutiepie</div>
+
+    <div id="openCardBtn" class="unlock-card">
+      <div class="unlock-sparkle">✨</div>
+      <div class="unlock-title">Tap to open your card</div>
+      <div class="unlock-icon">🎁</div>
+    </div>
+
+    <div class="final-message">
+      May every wish you make today come true.
+      You deserve the world, and I’ll always be here to remind you of that. 💖
+      <br /><br />
+      <span>Let’s always stay like this… together, forever.</span> 🧸
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1) GLOBAL UNLOCK TIME (UTC – SAME EVERYWHERE)
+    // ==========================================
+    // 🔴 CHANGE THIS LINE ONLY:
+    // Example below: 2025-12-10 03:30:00 UTC (which is 2025-12-09 22:30 EST)
+    const unlockTimestampUTC = Date.parse("2025-12-30T00:00:00Z");
+
+    // Page that opens after user taps the card
+    const redirectUrl = "countdownn.html";
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const daysEl    = document.getElementById("days");
+      const hoursEl   = document.getElementById("hours");
+      const minutesEl = document.getElementById("minutes");
+      const secondsEl = document.getElementById("seconds");
+
+      const cardCountdown = document.getElementById("card-countdown");
+      const cardFinished  = document.getElementById("card-finished");
+      const openCardBtn   = document.getElementById("openCardBtn");
+      const loadingEl     = document.getElementById("loading");
+
+      let timerInterval = null;
+
+      // Get server-side UTC time to avoid cheating with local clock
+      async function getServerTimeMs() {
+        try {
+          // Free public API that returns UTC time
+          const res = await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC");
+          if (!res.ok) throw new Error("Time API error");
+          const data = await res.json();
+          // data.unixtime is in seconds
+          return data.unixtime * 1000;
+        } catch (e) {
+          // Fallback: use local time if API fails
+          // (only if absolutely necessary)
+          console.warn("Time API failed, falling back to local time:", e);
+          return Date.now();
+        }
+      }
+
+      function showBirthdayCard() {
+        if (timerInterval) clearInterval(timerInterval);
+        if (cardCountdown) cardCountdown.style.display = "none";
+        if (cardFinished)  cardFinished.style.display  = "block";
+      }
+
+      async function initCountdown() {
+        if (loadingEl) loadingEl.textContent = "Loading timer…";
+
+        const serverStartMs = await getServerTimeMs();
+        const perfStart = performance.now();
+
+        if (loadingEl) loadingEl.style.display = "none";
+
+        // If already past unlock time → show card immediately
+        if (serverStartMs >= unlockTimestampUTC) {
+          showBirthdayCard();
+          return;
+        }
+
+        function updateCountdown() {
+          // Use monotonic clock so changing system time later does nothing
+          const elapsed = performance.now() - perfStart;
+          const currentMs = serverStartMs + elapsed;
+          let diff = unlockTimestampUTC - currentMs;
+
+          if (diff <= 0) {
+            showBirthdayCard();
+            return;
+          }
+
+          const totalSeconds = Math.floor(diff / 1000);
+
+          const days    = Math.floor(totalSeconds / (60 * 60 * 24));
+          const hours   = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
+          const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
+          const seconds = totalSeconds % 60;
+
+          if (daysEl)    daysEl.textContent    = days;
+          if (hoursEl)   hoursEl.textContent   = hours;
+          if (minutesEl) minutesEl.textContent = minutes;
+          if (secondsEl) secondsEl.textContent = seconds < 10 ? "0" + seconds : seconds;
+        }
+
+        updateCountdown();
+        timerInterval = setInterval(updateCountdown, 1000);
+      }
+
+      initCountdown();
+
+      if (openCardBtn) {
+        openCardBtn.addEventListener("click", () => {
+          window.location.href = redirectUrl;
+        });
+      }
+    });
+  </script>
+</body>
+</html>
